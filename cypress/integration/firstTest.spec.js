@@ -20,7 +20,7 @@ describe("Our first suite", () => {
 
     //!!! then => we moved to jQuery context and we have access to jQuery methods
     // F.E. Find - from jQuery
-    // Cypress - асинхронний і єдиний спосіб зберігати в змінні - це перейти в контекст jQuery
+    // Cypress is asynchronous and the only way to save variable - is to switch to jQuery context
     cy.contains("nb-card", "Using the Grid").then((firstForm) => {
       const emailLabelFirst = firstForm.find('[for="inputEmail1"]').text();
       const passwordLabelFirst = firstForm
@@ -49,19 +49,47 @@ describe("Our first suite", () => {
     });
   });
 
-  it.only("invoke command ", () => {
+  it("invoke command", () => {
     cy.visit("/");
     cy.contains("Forms").click();
     cy.contains("Form Layouts").click();
 
-
     // 1
-    cy.get('[for="exampleInputEmail1"]').should("contain", "Email address")
+    cy.get('[for="exampleInputEmail1"]').should("contain", "Email address");
 
     // 2
-    cy.get('[for="exampleInputEmail1"]').then(label => {
-      expect(label.text()).to.equal("Email address")
-    })
+    cy.get('[for="exampleInputEmail1"]').then((label) => {
+      expect(label.text()).to.equal("Email address");
+    });
 
+    // 3
+    cy.get('[for="exampleInputEmail1"]')
+      .invoke("text")
+      .then((text) => {
+        expect(text).to.equal("Email address");
+      });
+
+    cy.contains("nb-card", "Basic form")
+      .find("nb-checkbox")
+      .click()
+      .find(".custom-checkbox")
+      .invoke("attr", "class")
+      .should("contain", "checked");
+  });
+
+  it.only("assert property", () => {
+    cy.visit("/");
+    cy.contains("Forms").click();
+    cy.contains("Datepicker").click();
+
+    cy.contains("nb-card", "Common Datepicker")
+      .find("input")
+      .then((input) => {
+        cy.wrap(input).click();
+        cy.get("nb-calendar-day-picker").contains("17").click();
+        cy.wrap(input)
+          .invoke("prop", "value")
+          .should("contain", "Jun 17, 2021");
+      });
   });
 });
