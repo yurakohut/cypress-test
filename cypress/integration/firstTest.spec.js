@@ -77,7 +77,30 @@ describe("Our first suite", () => {
       .should("contain", "checked");
   });
 
-  it("assert property", () => {
+  it.only("assert property", () => {
+    const selectDayFromCurrent = (day) => {
+      const date = new Date();
+      date.setDate(date.getDate() + day);
+      const futureDay = date.getDate();
+      const futureMonth = date.toLocaleString("default", { month: "short" });
+      const dateAssert = `${futureMonth} ${futureDay}, ${date.getFullYear()}`
+
+      cy.get("nb-calendar-navigation")
+        .invoke("attr", "ng-reflect-date")
+        .then((dateAttribute) => {
+          if (!dateAttribute.includes(futureMonth)) {
+            cy.get('[data-name="chevron-right"]').click();
+            selectDayFromCurrent(day);
+          } else {
+            cy.get("nb-calendar-day-picker [class='day-cell ng-star-inserted']")
+              .contains(futureDay)
+              .click();
+          }
+        });
+
+      return dateAssert;
+    };
+
     cy.visit("/");
     cy.contains("Forms").click();
     cy.contains("Datepicker").click();
@@ -86,10 +109,9 @@ describe("Our first suite", () => {
       .find("input")
       .then((input) => {
         cy.wrap(input).click();
-        cy.get("nb-calendar-day-picker").contains("17").click();
-        cy.wrap(input)
-          .invoke("prop", "value")
-          .should("contain", "Jun 17, 2021");
+        const dateAssert = selectDayFromCurrent(2);
+
+        cy.wrap(input).invoke("prop", "value").should("contain", dateAssert);
       });
   });
 
@@ -126,7 +148,7 @@ describe("Our first suite", () => {
     cy.get('[type="checkbox"]').eq(0).click({ force: true });
   });
 
-  it.only("lists and dropdowns", () => {
+  it("lists and dropdowns", () => {
     cy.visit("/");
 
     // 1
@@ -159,7 +181,7 @@ describe("Our first suite", () => {
           "background-color",
           colors[itemText]
         );
-        
+
         if (index < 3) {
           cy.wrap(dropdown).click();
         }
